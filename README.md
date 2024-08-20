@@ -11,7 +11,7 @@ Stand above [Baileys](https://github.com/WhiskeySockets/Baileys) Library.
 Install package using npm
 
 ```
-npm install wa-multi-session@latest
+npm install wa-multi-session-baron@latest
 ```
 
 Then import your code
@@ -19,13 +19,13 @@ Then import your code
 Using JS Module
 
 ```ts
-import * as whatsapp from "wa-multi-session";
+import * as whatsapp from "wa-multi-session-baron";
 ```
 
 or using CommonJS
 
 ```ts
-const whatsapp = require("wa-multi-session");
+const whatsapp = require("wa-multi-session-baron");
 ```
 
 ## Session Usage/Examples
