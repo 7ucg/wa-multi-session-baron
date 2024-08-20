@@ -4,7 +4,7 @@ Connecting Your app with Whatsapp Messaging
 
 Lightweight library for whatsapp. Not require Selenium or any other browser.
 
-Stand above [Baileys](https://github.com/WhiskeySockets/Baileys) Library.
+Stand above [@queenanya/baileys](https://www.npmjs.com/package/@queenanya/baileys) Library.
 
 ## Installation
 
@@ -242,7 +242,7 @@ What's New:
 ### v3.0.0 June 2023
 
 - Fix Logout Issue
-- Switching into [@queenanya/baileys](https://github.com/WhiskeySockets/Baileys)
+- Switching into [@queenanya/baileys](https://www.npmjs.com/package/@queenanya/baileys)
 
 ## Authors
 
