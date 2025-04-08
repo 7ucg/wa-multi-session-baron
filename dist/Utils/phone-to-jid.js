@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.phoneToJid = void 0;
 const Error_1 = require("../Error");
-const baileys_1 = require("@queenanya/baileys");
+const baileys_1 = require("baron-baileys");
 const isPhoneNumberValidCountry = (phone) => {
     return Object.keys(baileys_1.PHONENUMBER_MCC).some((key) => {
         return phone.startsWith(key);

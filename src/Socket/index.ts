@@ -4,7 +4,7 @@ import makeWASocket, {
   fetchLatestBaileysVersion,
   useMultiFileAuthState,
   WASocket,
-} from "@queenanya/baileys";
+} from "baron-baileys";
 import pino from "pino";
 import path from "path";
 import { Boom } from "@hapi/boom";

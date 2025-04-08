@@ -1,5 +1,5 @@
 import { WhatsappError } from "../Error";
-import { PHONENUMBER_MCC } from "@queenanya/baileys";
+import { PHONENUMBER_MCC } from "baron-baileys";
 
 const isPhoneNumberValidCountry = (phone: string) => {
   return Object.keys(PHONENUMBER_MCC).some((key) => {

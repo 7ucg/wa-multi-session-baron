@@ -1,4 +1,4 @@
-import { proto } from "@queenanya/baileys";
+import { proto } from "baron-baileys";
 import { Messages } from "../Defaults";
 import { getSession } from "../Socket";
 import {

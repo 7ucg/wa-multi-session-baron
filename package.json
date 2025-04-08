@@ -1,6 +1,6 @@
 {
   "name": "wa-multi-session-baron",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Multi Session Whatsapp Library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,7 +17,7 @@
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
     "@hapi/boom": "^10.0.1",
-    "@queenanya/baileys": "^7.1.8",
+    "baron-baileys": "^2.3.2",
     "mime": "^3.0.0",
     "pino": "^8.11.0",
     "qrcode-terminal": "^0.12.0"

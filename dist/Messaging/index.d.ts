@@ -1,4 +1,4 @@
-import { proto } from "@queenanya/baileys";
+import { proto } from "baron-baileys";
 import { SendMediaTypes, SendMessageTypes, SendReadTypes, SendTypingTypes } from "../Types";
 export declare const sendTextMessage: ({ sessionId, to, text, isGroup, ...props }: SendMessageTypes) => Promise<proto.WebMessageInfo | undefined>;
 export declare const sendImage: ({ sessionId, to, text, isGroup, media, ...props }: SendMediaTypes) => Promise<proto.WebMessageInfo | undefined>;

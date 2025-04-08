@@ -1,4 +1,4 @@
-import { downloadMediaMessage } from "@queenanya/baileys";
+import { downloadMediaMessage } from "baron-baileys";
 import { MessageReceived } from "../Types";
 import ValidationError from "./error";
 import fs from "fs/promises";

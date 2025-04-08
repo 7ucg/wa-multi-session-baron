@@ -1,4 +1,4 @@
-import { WAMessageUpdate, proto } from "@queenanya/baileys";
+import { WAMessageUpdate, proto } from "baron-baileys";
 
 export interface SendMessageTypes {
   to: string | number;
