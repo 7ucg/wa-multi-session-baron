@@ -73,6 +73,11 @@ bot.onQR((sessionId, qr) => {
   console.log(qr);
 });
 
+// Optional: Handle pairing codes (alternative to QR)
+bot.onPairingCode((sessionId, code) => {
+  console.log(`[${sessionId}] Pairing Code: ${code}`);
+});
+
 // Optional: Handle connection events
 bot.onConnected((sessionId) => {
   console.log(`✓ ${sessionId} connected`);
@@ -83,13 +88,32 @@ bot.onDisconnected((sessionId) => {
 });
 ```
 
-**Message Object Methods:**
+**Message Object Methods & Properties:**
 - `msg.respond(content)` - Reply to sender with correct session
 - `msg.send(jid, content)` - Send to any contact with this session
 - `msg.typing(duration)` - Show typing effect
 - `msg.read()` - Mark message as read
-- `msg.sessionId` - Which session received this
-- `msg.socket` - Raw Baileys socket (see below)
+- `msg.sessionId` - Which session received this message
+- `msg.socket` - Raw Baileys socket for this specific session (automatically correct for concurrent messages)
+
+**Alternative: Use Pairing Code instead of QR**
+```javascript
+const bot = new MultiSessionBot();
+
+// Start session with pairing code (no QR needed)
+await bot.addSessionWithPairingCode("bot1", { phoneNumber: "1234567890" });
+
+// Listen for pairing code
+bot.onPairingCode((sessionId, code) => {
+  console.log(`[${sessionId}] Pairing Code: ${code}`);
+  // User inputs this code in WhatsApp when prompted
+});
+
+// Rest of the code works the same way
+bot.onMessage(async (msg) => {
+  console.log(`[${msg.sessionId}] ${msg.body}`);
+});
+```
 
 **Note:** With 50+ sessions, use a slight delay when starting:
 ```javascript
@@ -229,10 +253,15 @@ await sendTextMessage({
 ### MultiSessionBot
 ```javascript
 bot.addSession(sessionId, options)
+bot.addSessionWithPairingCode(sessionId, { phoneNumber })  // Alternative auth method
 bot.removeSession(sessionId)
 bot.getAllSessions()
+bot.socket                        // Get raw socket of default session
+bot.getSocket(sessionId)          // Get raw socket of specific session
+bot.setDefaultSession(sessionId)  // Set which session is default
 bot.onMessage(handler)
 bot.onQR(handler)
+bot.onPairingCode(handler)        // Handle pairing code from WhatsApp
 bot.onConnected(handler)
 bot.onDisconnected(handler)
 ```
@@ -294,7 +323,31 @@ bot.onMessage(async (msg) => {
 console.log("10 bots running!");
 ```
 
-### Example 2: Auto-Reply Bot
+### Example 2: Direct Socket Access from Message
+```javascript
+const { MultiSessionBot } = require("wa-multi-session-baron");
+
+const bot = new MultiSessionBot();
+
+await bot.addSession("bot1");
+await bot.addSession("bot2");
+
+// Access raw socket for each message correctly
+bot.onMessage(async (msg) => {
+  // msg.socket is always the correct socket for this message
+  const sock = msg.socket;
+  
+  // Safe with concurrent messages - no mixing of sessions!
+  await sock.sendMessage(msg.from, {
+    text: "Message from session: " + msg.sessionId
+  });
+  
+  // Works perfectly even when bot1 and bot2 get messages simultaneously
+  console.log(`[${msg.sessionId}] Direct socket access works!`);
+});
+```
+
+### Example 3: Auto-Reply Bot
 ```javascript
 const { SessionManager } = require("wa-multi-session-baron");
 
@@ -314,7 +367,7 @@ onMessageReceived((msg) => {
 });
 ```
 
-### Example 3: Group Manager with Raw API
+### Example 4: Group Manager with Raw API
 ```javascript
 const { startSession, getSession, onMessageReceived } = require("wa-multi-session-baron");
 

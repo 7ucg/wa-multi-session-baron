@@ -1,5 +1,6 @@
 const {
   startSession,
+  startSessionWithPairingCode,
   deleteSession,
   getSession,
   setDefaultSession,
@@ -35,7 +36,7 @@ class MultiSessionBot {
   }
 
   /**
-   * Neue Session hinzufügen
+   * Neue Session hinzufügen (mit QR-Code)
    */
   async addSession(sessionId, options = { printQR: true }) {
     await startSession(sessionId, options);
@@ -44,6 +45,28 @@ class MultiSessionBot {
       setDefaultSession(sessionId);
     }
     console.log(`✓ Session "${sessionId}" started`);
+  }
+
+  /**
+   * Neue Session mit Pairing-Code hinzufügen (ohne QR)
+   * @param {string} sessionId - Eindeutige ID für diese Session
+   * @param {object} options - Optionen mit phoneNumber
+   * @example
+   * await bot.addSessionWithPairingCode("bot1", { phoneNumber: "1234567890" });
+   * bot.onPairingCode((sessionId, code) => {
+   *   console.log(`[${sessionId}] Pairing Code: ${code}`);
+   * });
+   */
+  async addSessionWithPairingCode(sessionId, options = {}) {
+    if (!options.phoneNumber) {
+      throw new Error("phoneNumber ist erforderlich für Pairing-Code");
+    }
+    await startSessionWithPairingCode(sessionId, options);
+    this.sessions.set(sessionId, { active: true });
+    if (this.sessions.size === 1) {
+      setDefaultSession(sessionId);
+    }
+    console.log(`✓ Session "${sessionId}" started with pairing code`);
   }
 
   /**
@@ -143,6 +166,15 @@ class MultiSessionBot {
   onDisconnected(handler) {
     onDisconnected((sessionId) => {
       handler(sessionId);
+    });
+  }
+
+  /**
+   * Globaler Pairing-Code-Handler
+   */
+  onPairingCode(handler) {
+    onPairingCode((sessionId, code) => {
+      handler(sessionId, code);
     });
   }
 
