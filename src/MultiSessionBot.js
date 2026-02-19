@@ -2,6 +2,8 @@ const {
   startSession,
   deleteSession,
   getSession,
+  setDefaultSession,
+  getDefaultSession,
   onMessageReceived,
   onQRUpdated,
   onConnected,
@@ -38,6 +40,9 @@ class MultiSessionBot {
   async addSession(sessionId, options = { printQR: true }) {
     await startSession(sessionId, options);
     this.sessions.set(sessionId, { active: true });
+    if (this.sessions.size === 1) {
+      setDefaultSession(sessionId);
+    }
     console.log(`✓ Session "${sessionId}" started`);
   }
 
@@ -55,6 +60,56 @@ class MultiSessionBot {
    */
   getAllSessions() {
     return Array.from(this.sessions.keys());
+  }
+
+  /**
+   * Hole das Raw Socket einer bestimmten Session
+   * @param {string} sessionId - Session ID (optional, verwendet Standard-Session wenn nicht angegeben)
+   * @returns {object} Das Raw Baileys Socket Object
+   * @example
+   * const sock = bot.getSocket("bot1");
+   * // oder mit Standard-Session:
+   * const sock = bot.getSocket();
+   */
+  getSocket(sessionId) {
+    const id = sessionId || getDefaultSession();
+    if (!id) {
+      throw new Error("Keine Session angegeben und keine Standard-Session gesetzt");
+    }
+    const sock = getSession(id);
+    if (!sock) {
+      throw new Error(`Socket für Session "${id}" nicht gefunden`);
+    }
+    return sock;
+  }
+
+  /**
+   * Direkter Zugriff auf das Raw Socket der Standard-Session
+   * @getter
+   * @returns {object} Das Raw Baileys Socket Object
+   * @example
+   * const sock = bot.socket;
+   */
+  get socket() {
+    const defaultSessionId = getDefaultSession();
+    if (!defaultSessionId) {
+      throw new Error("Keine Standard-Session gesetzt. Verwenden Sie bot.getSocket(sessionId) oder setzen Sie eine Standard-Session mit bot.setDefaultSession(sessionId)");
+    }
+    const sock = getSession(defaultSessionId);
+    if (!sock) {
+      throw new Error(`Socket für Standard-Session "${defaultSessionId}" nicht gefunden`);
+    }
+    return sock;
+  }
+
+  /**
+   * Setze die Standard-Session für Socket-Zugriff
+   */
+  setDefaultSession(sessionId) {
+    if (!this.sessions.has(sessionId)) {
+      throw new Error(`Session "${sessionId}" existiert nicht`);
+    }
+    setDefaultSession(sessionId);
   }
 
   /**

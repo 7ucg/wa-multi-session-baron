@@ -1,9 +1,29 @@
-const makeWASocket = require("baron-baileys-v2");
+
+const makeWASocket = require("baron-baileys-v2").default;
 const {
-  Browsers,
-  DisconnectReason,
-  fetchLatestBaileysVersion,
+  default: generateWAMessageFromContent,
+  getAggregateVotesInPollMessage,
+  getAggregateVotesInPollMessageV2,
+  downloadContentFromMessage,
+  getAggregateResponsesInEventMessage,
+  normalizeMessageContent,
+  getKeyAuthor,
+  toNumber,
   useMultiFileAuthState,
+  fetchLatestBaileysVersion,
+  generateWAMessage,
+  makeInMemoryStore,
+  DisconnectReason,
+  areJidsSameUser,
+  jidNormalizedUser,
+  decryptEventEdit,
+  getContentType,
+  decryptPollVote,
+  relayMessage,
+  jidDecode,
+  Browsers,
+  Browser,
+  proto,
 } = require("baron-baileys-v2");
 const pino = require("pino");
 const path = require("path");
