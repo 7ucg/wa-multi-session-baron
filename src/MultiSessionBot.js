@@ -160,6 +160,7 @@ class MultiSessionBot {
       const wrappedMsg = {
         ...msg,
         sessionId,
+        socket: sock,
 
         /**
          * Antworte auf diese Nachricht mit der RICHTIGEN Session
