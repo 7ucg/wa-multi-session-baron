@@ -1,15 +1,14 @@
 {
   "name": "wa-multi-session-baron",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Multi Session Whatsapp Library",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "src/index.js",
   "files": [
-    "dist/**/*"
+    "src/**/*.js"
   ],
   "scripts": {
-    "build": "tsc",
-    "start": "tsc && node ./dist/index.js",
+    "build": "echo \"No build needed - using pure JavaScript\"",
+    "start": "node ./src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "7ucg",
@@ -17,7 +16,7 @@
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
     "@hapi/boom": "^10.0.1",
-    "baron-baileys": "^2.3.2",
+    "baron-baileys-v2": "github:Barons-Team/baron-baileys-v2",
     "mime": "^3.0.0",
     "pino": "^8.11.0",
     "qrcode-terminal": "^0.12.0"
@@ -26,7 +25,5 @@
     "type": "git",
     "url": "git+ssh://git@github.com/7ucg/wa-multi-session-baron.git"
   },
-  "devDependencies": {
-    "@types/mime": "^3.0.1"
-  }
+  "devDependencies": {}
 }

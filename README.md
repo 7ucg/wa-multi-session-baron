@@ -1,250 +1,450 @@
-# Whatsapp Multi Session - Connecting More Whatsapp Session in 1 App
+# Whatsapp Multi Session - Connecting More Whatsapp Sessions in 1 App
 
-Connecting Your app with Whatsapp Messaging
+Lightweight, pure JavaScript library for WhatsApp messaging with support for multiple sessions. Built on [baron-baileys-v2](https://www.npmjs.com/package/baron-baileys-v2). No Selenium or browser automation required.
 
-Lightweight library for whatsapp. Not require Selenium or any other browser.
+## ✨ Features
 
-Stand above [baron-baileys](https://www.npmjs.com/package/baron-baileys) Library.
+- ✅ **Multiple Sessions** - Run 5, 10, 50+ WhatsApp bots simultaneously
+- ✅ **Pure JavaScript** - No TypeScript, no build step needed
+- ✅ **CommonJS** - Standard require() syntax
+- ✅ **3 Usage Modes** - Choose what fits your use case
+- ✅ **Direct Baileys Access** - Use raw `socket.sendMessage()` anytime
+- ✅ **Media Support** - Send/receive images, videos, documents, audio
+- ✅ **Message Events** - Global handler for all sessions
 
 ## Installation
 
-Install package using npm
-
-```
+```bash
 npm install wa-multi-session-baron@latest
 ```
 
-Then import your code
+## Import
 
-Using JS Module
-
-```ts
-import * as whatsapp from "wa-multi-session-baron";
+```javascript
+const {
+  MultiSessionBot,
+  SessionManager,
+  startSession,
+  getSession,
+  setDefaultSession,
+} = require("wa-multi-session-baron");
 ```
 
-or using CommonJS
+---
 
-```ts
-const whatsapp = require("wa-multi-session-baron");
-```
+## Usage Guide
 
-## Session Usage/Examples
+### **Option 1: MultiSessionBot** (Best for 5+ Sessions)
 
-Start New Session
+Perfect when you need **one handler for all sessions**. Messages from ANY session go to one callback.
 
-```ts
-// create session with ID : mysessionid
+```javascript
+const { MultiSessionBot } = require("wa-multi-session-baron");
 
-const session = await whatsapp.startSession("mysessionid");
-// Then, scan QR on terminal
-```
+const bot = new MultiSessionBot();
 
-Get All Session ID
+// Start multiple sessions
+await bot.addSession("bot1");
+await bot.addSession("bot2");
+await bot.addSession("bot3");
 
-```ts
-const sessions = whatsapp.getAllSession();
-// returning all session ID that has been created
-```
-
-Get Session Data By ID
-
-```ts
-const session = whatsapp.getSession("mysessionid");
-// returning session data
-```
-
-Load Session From Storage / Load Saved Session
-
-```ts
-whatsapp.loadSessionsFromStorage();
-// Start saved session without scan again
-```
-
-## Messaging Usage/Examples
-
-Send Text Message
-
-```ts
-await whatsapp.sendTextMessage({
-  sessionId: "mysessionid", // session ID
-  to: "6281234567890", // always add country code (ex: 62)
-  text: "Hi There, This is Message from Server!", // message you want to send
+// ONE handler for ALL sessions!
+bot.onMessage(async (msg) => {
+  console.log(`[${msg.sessionId}] ${msg.pushName}: ${msg.body}`);
+  
+  // Reply to sender with the CORRECT session automatically
+  if (msg.body === "hello") {
+    await msg.respond({ text: "Hi there! 👋" });
+  }
+  
+  // Or send to any other contact with this session
+  await msg.send("1234567890", { text: "Test message" });
+  
+  // Show typing effect
+  await msg.typing(2000);
+  
+  // Mark as read
+  await msg.read();
 });
-```
 
-Send Image
-
-```ts
-const image = fs.readFileSync("./myimage.png"); // return Buffer
-const send = await whatsapp.sendImage({
-  sessionId: "session1",
-  to: "6281234567890",
-  text: "My Image Caption",
-  media: image, // can from URL too
-});
-```
-
-Send Video
-
-```ts
-const video = fs.readFileSync("./myvideo.mp4"); // return Buffer
-const send = await whatsapp.sendVideo({
-  sessionId: "session1",
-  to: "6281234567890",
-  text: "My Video Caption",
-  media: video, // can from URL too
-});
-```
-
-Send Document File
-
-```ts
-const filename = "mydocument.docx";
-const document = fs.readFileSync(filename); // return Buffer
-const send = await whatsapp.sendDocument({
-  sessionId: "session1",
-  to: "6281234567890",
-  filename: filename,
-  media: document,
-  text: "Hei, Check this Document",
-});
-```
-
-Send Voice Note
-
-```ts
-const filename = "myaudio.mp3";
-const audio = fs.readFileSync(filename); // return Buffer
-const send = await whatsapp.sendVoiceNote({
-  sessionId: "session1",
-  to: "6281234567890",
-  media: audio,
-});
-```
-
-Read a Message
-
-```ts
-await whatsapp.readMessage({
-  sessionId: "session1",
-  key: msg.key,
-});
-```
-
-Send Typing Effect
-
-```ts
-await whatsapp.sendTyping({
-  sessionId: "session1",
-  to: "6281234567890",
-  duration: 3000,
-});
-```
-
-## Listener Usage/Examples
-
-Add Listener/Callback When Receive a Message
-
-```ts
-whatsapp.onMessageReceived((msg) => {
-  console.log(`New Message Received On Session: ${msg.sessionId} >>>`, msg);
-});
-```
-
-Add Listener/Callback When QR Printed
-
-```ts
-whatsapp.onQRUpdated(({ sessionId, qr }) => {
+// Optional: Handle QR codes
+bot.onQR((sessionId, qr) => {
+  console.log(`[${sessionId}] Scan this QR:`);
   console.log(qr);
 });
-```
 
-Add Listener/Callback When Session Connected
+// Optional: Handle connection events
+bot.onConnected((sessionId) => {
+  console.log(`✓ ${sessionId} connected`);
+});
 
-```ts
-whatsapp.onConnected((sessionId) => {
-  console.log("session connected :" + sessionId);
+bot.onDisconnected((sessionId) => {
+  console.log(`✗ ${sessionId} disconnected`);
 });
 ```
 
-## Handling Incoming Message Examples
+**Message Object Methods:**
+- `msg.respond(content)` - Reply to sender with correct session
+- `msg.send(jid, content)` - Send to any contact with this session
+- `msg.typing(duration)` - Show typing effect
+- `msg.read()` - Mark message as read
+- `msg.sessionId` - Which session received this
+- `msg.socket` - Raw Baileys socket (see below)
 
-```ts
-whatsapp.onMessageReceived(async (msg) => {
-  if (msg.key.fromMe || msg.key.remoteJid.includes("status")) return;
-  await whatsapp.readMessage({
-    sessionId: msg.sessionId,
-    key: msg.key,
-  });
-  await whatsapp.sendTyping({
-    sessionId: msg.sessionId,
-    to: msg.key.remoteJid,
-    duration: 3000,
-  });
-  await whatsapp.sendTextMessage({
-    sessionId: msg.sessionId,
-    to: msg.key.remoteJid,
-    text: "Hello!",
-    answering: msg, // for quoting message
-  });
+**Note:** With 50+ sessions, use a slight delay when starting:
+```javascript
+for (let i = 1; i <= 50; i++) {
+  await bot.addSession(`bot${i}`);
+  await new Promise(r => setTimeout(r, 2000)); // 2s delay
+}
+```
+
+---
+
+### **Option 2: SessionManager** (Best for Single/Few Sessions)
+
+Easier API for managing one session. No `sessionId` parameter needed.
+
+```javascript
+const { SessionManager } = require("wa-multi-session-baron");
+
+// Create manager for one session
+const bot = new SessionManager("mybot");
+
+// Start session
+await bot.start({ printQR: true });
+
+// Check if active
+if (bot.isActive()) {
+  console.log("Bot is running!");
+}
+
+// Use convenience methods (no sessionId needed)
+await bot.sendText({ to: "1234567890", text: "Hello!" });
+await bot.sendImage({ to: "1234567890", media: buffer });
+await bot.sendVideo({ to: "1234567890", media: buffer, text: "Watch this" });
+await bot.sendDocument({ to: "1234567890", media: buffer, filename: "doc.pdf" });
+await bot.sendVoiceNote({ to: "1234567890", media: buffer });
+await bot.sendSticker({ to: "1234567890", media: buffer });
+await bot.typing({ to: "1234567890", duration: 2000 });
+await bot.readMsg(messageKey);
+
+// Stop session
+await bot.stop();
+```
+
+**Or use raw Baileys socket:**
+```javascript
+const bot = new SessionManager("mybot");
+await bot.start();
+
+// Access raw socket anytime
+const sock = bot.socket;
+// or
+const sock = bot.getSocket();
+
+// Use Baileys directly
+await sock.sendMessage(jid, { text: "Raw message" });
+await sock.sendMessage(jid, { image: { url: "https://..." } });
+```
+
+---
+
+### **Option 3: Raw Baileys API** (Most Flexible)
+
+Use the raw `getSession()` for maximum control. This is just plain Baileys!
+
+```javascript
+const {
+  startSession,
+  getSession,
+  onMessageReceived,
+  onConnected,
+  onDisconnected,
+} = require("wa-multi-session-baron");
+
+// Start session
+await startSession("mybot");
+
+// Get socket (standard Baileys WASocket)
+const sock = getSession("mybot");
+
+// Use Baileys directly
+await sock.sendMessage(jid, { text: "Hello!" });
+await sock.sendMessage(jid, { image: { url: "https://..." } });
+await sock.sendMessage(jid, { 
+  video: fs.readFileSync("video.mp4"),
+  caption: "Check this"
+});
+
+// Listen to events
+onMessageReceived((msg) => {
+  if (msg.body === "test") {
+    sock.sendMessage(msg.from, { text: "Got it!" });
+  }
+});
+
+onConnected((sessionId) => {
+  console.log(sessionId + " is ready!");
 });
 ```
 
-## Save Media Message (Image, Video, Document)
+---
 
-```ts
-wa.onMessageReceived(async (msg) => {
+### **Option 4: Default Session** (Optional Shortcut)
+
+Set a default session so you don't need `sessionId` in every call:
+
+```javascript
+const {
+  startSession,
+  setDefaultSession,
+  sendTextMessage,
+} = require("wa-multi-session-baron");
+
+await startSession("bot1");
+setDefaultSession("bot1"); // Set as default
+
+// Now sessionId is optional!
+await sendTextMessage({
+  to: "1234567890",
+  text: "Hello!" // sessionId will use default
+});
+
+// Switch to another session
+await startSession("bot2");
+setDefaultSession("bot2");
+
+// This goes to bot2
+await sendTextMessage({
+  to: "1234567890",
+  text: "From bot2"
+});
+```
+
+---
+
+## API Reference
+
+### MultiSessionBot
+```javascript
+bot.addSession(sessionId, options)
+bot.removeSession(sessionId)
+bot.getAllSessions()
+bot.onMessage(handler)
+bot.onQR(handler)
+bot.onConnected(handler)
+bot.onDisconnected(handler)
+```
+
+### SessionManager
+```javascript
+bot.start(options)
+bot.stop()
+bot.isActive()
+bot.socket
+bot.getSocket()
+bot.sendText({ to, text, isGroup, answering })
+bot.sendImage({ to, text, media, isGroup })
+bot.sendVideo({ to, text, media, isGroup })
+bot.sendDocument({ to, text, media, filename, isGroup })
+bot.sendVoiceNote({ to, media, isGroup })
+bot.sendSticker({ to, media, isGroup })
+bot.typing({ to, duration, isGroup })
+bot.readMsg(key)
+```
+
+### Direct Functions
+```javascript
+startSession(sessionId, options)
+deleteSession(sessionId)
+getSession(sessionId)
+getAllSession()
+setDefaultSession(sessionId)
+getDefaultSession()
+onMessageReceived(handler)
+onConnected(handler)
+onDisconnected(handler)
+onQRUpdated(handler)
+```
+
+---
+
+## Examples
+
+### Example 1: Chat Bot with 10 Sessions
+```javascript
+const { MultiSessionBot } = require("wa-multi-session-baron");
+
+const bot = new MultiSessionBot();
+
+// Start 10 bots
+for (let i = 1; i <= 10; i++) {
+  await bot.addSession(`bot${i}`);
+  await new Promise(r => setTimeout(r, 2000));
+}
+
+// Handle all messages
+bot.onMessage(async (msg) => {
+  if (msg.body.toLowerCase() === "ping") {
+    await msg.respond({ text: "Pong! 🏓" });
+  }
+});
+
+console.log("10 bots running!");
+```
+
+### Example 2: Auto-Reply Bot
+```javascript
+const { SessionManager } = require("wa-multi-session-baron");
+
+const bot = new SessionManager("autoreply");
+await bot.start();
+
+// Listen to messages (use getSession to access listeners)
+const { onMessageReceived } = require("wa-multi-session-baron");
+
+onMessageReceived((msg) => {
+  if (msg.sessionId === "autoreply" && !msg.key.fromMe) {
+    bot.sendText({
+      to: msg.from,
+      text: `You said: ${msg.body}`
+    });
+  }
+});
+```
+
+### Example 3: Group Manager with Raw API
+```javascript
+const { startSession, getSession, onMessageReceived } = require("wa-multi-session-baron");
+
+await startSession("groupbot");
+const sock = getSession("groupbot");
+
+onMessageReceived((msg) => {
+  if (msg.isGroup) {
+    // Send to group
+    sock.sendMessage(msg.from, { 
+      text: "Thanks for the message!" 
+    });
+  }
+});
+```
+
+---
+
+## Configuration
+
+### Custom Credentials Directory
+
+By default, session data is saved in `wa_credentials/`. Change it:
+
+```javascript
+const { setCredentialsDir } = require("wa-multi-session-baron");
+
+setCredentialsDir("./my_bot_sessions");
+```
+
+### Session Options
+
+```javascript
+await bot.addSession("mybot", {
+  printQR: true  // Show QR in terminal (default: true)
+});
+```
+
+---
+
+## Media Support
+
+### Send Media
+
+```javascript
+const fs = require("fs");
+
+// From Buffer
+const buffer = fs.readFileSync("image.jpg");
+await bot.sendImage({ to: "123456", media: buffer });
+
+// From URL
+await bot.sendImage({ to: "123456", media: "https://example.com/image.jpg" });
+```
+
+### Receive Media
+
+```javascript
+bot.onMessage(async (msg) => {
   if (msg.message?.imageMessage) {
-    // save image
-    msg.saveImage("./myimage.jpg");
-  }
-
-  if (msg.message?.videoMessage) {
-    // save video
-    msg.saveVideo("./myvideo.mp4");
-  }
-
-  if (msg.message?.documentMessage) {
-    // save document
-    msg.saveDocument("./mydocument"); // without extension
+    await msg.socket.downloadAndSaveMediaMessage(msg, "image.jpg");
   }
 });
 ```
 
-## Optional Configuration Usage/Examples
+---
 
-Set custom credentials directory
+## Troubleshooting
 
-```ts
-// default dir is "wa_credentials"
-whatsapp.setCredentialsDir("my_custom_dir");
-// or : credentials/mycreds
+**Q: How many sessions can I run?**
+A: Depends on your system RAM (~100MB per session) and network. Most people run 5-20 successfully.
+
+**Q: Sessions keep disconnecting?**
+A: WhatsApp's API might disconnect inactive sessions. Keep them active with periodic messages.
+
+**Q: Can I use both MultiSessionBot and SessionManager together?**
+A: No, use one or the other per app.
+
+**Q: How do I get the raw Baileys socket?**
+A: 
+```javascript
+// Option 1
+const sock = bot.socket; // SessionManager
+
+// Option 2
+const sock = getSession("sessionId"); // Direct function
+
+// Option 3
+msg.socket; // From message event
 ```
 
-## Change Log
+---
 
-### v3.3 September 2023 (LATEST)
+## Migration from Old API
 
-What's New:
+**Old way** (if upgrading):
+```javascript
+// Before: sessionId required everywhere
+await sendTextMessage({
+  sessionId: "bot1",
+  to: "123456",
+  text: "Hello"
+});
+```
 
-- Send Voice Note
-- Send Sticker
-- onMessageUpdate (message ack status)
+**New way** (options):
+```javascript
+// Option A: Use default session
+setDefaultSession("bot1");
+await sendTextMessage({ to: "123456", text: "Hello" });
 
-### v3.2.1 July 2023
+// Option B: Use MultiSessionBot (recommended)
+const bot = new MultiSessionBot();
+await bot.addSession("bot1");
+bot.onMessage(async (msg) => {
+  await msg.respond({ text: "Hello" });
+});
 
-- Add error class named: WhatsappError
+// Option C: Use raw socket (most flexible)
+const sock = getSession("bot1");
+await sock.sendMessage(jid, { text: "Hello" });
+```
 
-### v3.1.2 July 2023
+---
 
-- Add send document message
+## License
 
-### v3.0.0 June 2023
+MIT - See LICENSE file
 
-- Fix Logout Issue
-- Switching into [baron-baileys](https://www.npmjs.com/package/baron-baileys)
+## Author
 
-## Authors
-
-- [Baron](https://www.github.com/7ucg)
+[Baron](https://github.com/7ucg)
 
