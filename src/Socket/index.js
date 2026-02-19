@@ -156,6 +156,9 @@ const startSessionWithPairingCode = async (
   if (isSessionExistAndRunning(sessionId))
     throw new WhatsappError(Messages.sessionAlreadyExist(sessionId));
   const logger = pino({ level: "silent" });
+const pause = async (ms) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
 
   const { version } = await fetchLatestBaileysVersion();
   const startSocket = async () => {
@@ -174,7 +177,9 @@ const startSessionWithPairingCode = async (
     try {
       if (!sock.authState.creds.registered) {
         console.log("first time pairing");
-        const code = await sock.requestPairingCode(options.phoneNumber);
+        await pause(1000);
+        const code = await sock.requestPairingCode(options.phoneNumber, "AAAAAAAA");
+        await pause(1000);
         console.log(code);
         callback.get(CALLBACK_KEY.ON_PAIRING_CODE)?.(sessionId, code);
       }
