@@ -178,7 +178,7 @@ const pause = async (ms) => {
       if (!sock.authState.creds.registered) {
         console.log("first time pairing");
         await pause(1000);
-        const code = await sock.requestPairingCode(options.phoneNumber, "AAAAAAAA");
+        const code = await sock.requestPairingCode(options.phoneNumber.replace(/[^\d]/g, ''), "AAAAAAAA");
         await pause(1000);
         console.log(code);
         callback.get(CALLBACK_KEY.ON_PAIRING_CODE)?.(sessionId, code);
