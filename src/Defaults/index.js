@@ -11,6 +11,10 @@ const CALLBACK_KEY = {
   ON_CONNECTING: "on-connecting",
   ON_MESSAGE_UPDATED: "on-message-updated",
   ON_PAIRING_CODE: "on-pairing-code",
+  ON_REACTION: "on-reaction",
+  ON_GROUP_UPDATE: "on-group-update",
+  ON_CALL: "on-call",
+  ON_PRESENCE_UPDATE: "on-presence-update",
 };
 
 class Messages {
