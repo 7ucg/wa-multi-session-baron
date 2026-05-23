@@ -3,7 +3,6 @@ const makeWASocket = require("baron-baileys-v2").default;
 const {
   default: generateWAMessageFromContent,
   getAggregateVotesInPollMessage,
-  getAggregateVotesInPollMessageV2,
   downloadContentFromMessage,
   getAggregateResponsesInEventMessage,
   normalizeMessageContent,
@@ -16,13 +15,10 @@ const {
   DisconnectReason,
   areJidsSameUser,
   jidNormalizedUser,
-  decryptEventEdit,
   getContentType,
   decryptPollVote,
-  relayMessage,
   jidDecode,
   Browsers,
-  Browser,
   proto,
 } = require("baron-baileys-v2");
 const pino = require("pino");

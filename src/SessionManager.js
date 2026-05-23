@@ -8,10 +8,12 @@ const {
   onQRUpdated,
   onConnected,
   onDisconnected,
+  onConnecting,
   onPairingCode,
   onReaction,
   onGroupUpdate,
   onCall,
+  onPresenceUpdate,
 } = require("./Socket/index.js");
 const {
   sendTextMessage,
@@ -26,6 +28,11 @@ const {
   sendContact,
   sendTyping,
   readMessage,
+  sendInteractive,
+  sendAlbum,
+  sendEvent,
+  sendPoll,
+  sendStatus,
 } = require("./Messaging/index.js");
 
 /**
@@ -132,6 +139,13 @@ class SessionManager {
     return this;
   }
 
+  onConnecting(handler) {
+    onConnecting((sessionId) => {
+      if (sessionId === this.sessionId) handler();
+    });
+    return this;
+  }
+
   onReaction(handler) {
     onReaction((data) => {
       if (data.sessionId === this.sessionId) handler(data);
@@ -148,6 +162,13 @@ class SessionManager {
 
   onCall(handler) {
     onCall((data) => {
+      if (data.sessionId === this.sessionId) handler(data);
+    });
+    return this;
+  }
+
+  onPresenceUpdate(handler) {
+    onPresenceUpdate((data) => {
       if (data.sessionId === this.sessionId) handler(data);
     });
     return this;
@@ -201,6 +222,26 @@ class SessionManager {
 
   async readMsg(key) {
     return readMessage({ sessionId: this.sessionId, key });
+  }
+
+  async sendInteractive({ to, isGroup = false, ...content }) {
+    return sendInteractive({ sessionId: this.sessionId, to, isGroup, ...content });
+  }
+
+  async sendAlbum({ to, isGroup = false, album, answering }) {
+    return sendAlbum({ sessionId: this.sessionId, to, isGroup, album, answering });
+  }
+
+  async sendEvent({ to, isGroup = false, event, answering }) {
+    return sendEvent({ sessionId: this.sessionId, to, isGroup, event, answering });
+  }
+
+  async sendPoll({ to, isGroup = false, name, options, selectableCount, answering }) {
+    return sendPoll({ sessionId: this.sessionId, to, isGroup, name, options, selectableCount, answering });
+  }
+
+  async sendStatus({ content, jids }) {
+    return sendStatus({ sessionId: this.sessionId, content, jids });
   }
 }
 

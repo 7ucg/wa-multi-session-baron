@@ -17,6 +17,13 @@ const {
   onCall,
   onPresenceUpdate,
 } = require("./Socket/index.js");
+const {
+  sendInteractive,
+  sendAlbum,
+  sendEvent,
+  sendPoll,
+  sendStatus,
+} = require("./Messaging/index.js");
 
 /**
  * MultiSessionBot - Zentrale Verwaltung mehrerer Sessions mit globalem Handler
@@ -204,6 +211,28 @@ class MultiSessionBot {
   onPresenceUpdate(handler) {
     onPresenceUpdate((data) => handler(data));
     return this;
+  }
+
+  // ── Extra Messaging ──────────────────────────────────────────────────────
+
+  async sendInteractive(sessionId, { to, isGroup = false, ...content }) {
+    return sendInteractive({ sessionId, to, isGroup, ...content });
+  }
+
+  async sendAlbum(sessionId, { to, isGroup = false, album, answering }) {
+    return sendAlbum({ sessionId, to, isGroup, album, answering });
+  }
+
+  async sendEvent(sessionId, { to, isGroup = false, event, answering }) {
+    return sendEvent({ sessionId, to, isGroup, event, answering });
+  }
+
+  async sendPoll(sessionId, { to, isGroup = false, name, options, selectableCount, answering }) {
+    return sendPoll({ sessionId, to, isGroup, name, options, selectableCount, answering });
+  }
+
+  async sendStatus(sessionId, { content, jids }) {
+    return sendStatus({ sessionId, content, jids });
   }
 
   // ── Private ──────────────────────────────────────────────────────────────

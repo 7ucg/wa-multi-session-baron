@@ -210,6 +210,66 @@ const readMessage = async ({ sessionId, key }) => {
   await session.readMessages(keys);
 };
 
+/**
+ * Sende eine interaktive Nachricht via Baron-Handler (nativeFlowMessage / interactiveMessage)
+ * @param {object} content - interactiveMessage oder interactiveButtons Objekt
+ */
+const sendInteractive = async ({ sessionId, to, isGroup = false, ...content }) => {
+  const { session } = _resolveSession(sessionId);
+  const jid = phoneToJid({ to, isGroup });
+  return session.sendMessage(jid, content);
+};
+
+/**
+ * Sende ein Album (Bild/Video-Sammlung)
+ * @param {Array} album - Array von { image|video, caption? } Objekten
+ */
+const sendAlbum = async ({ sessionId, to, isGroup = false, album, answering }) => {
+  const { session } = _resolveSession(sessionId);
+  const jid = phoneToJid({ to, isGroup });
+  return session.sendMessage(jid, { albumMessage: album }, { quoted: answering });
+};
+
+/**
+ * Sende ein Event
+ * @param {object} event - { name, description, location, startTime, endTime, joinLink?, isCanceled?, extraGuestsAllowed? }
+ */
+const sendEvent = async ({ sessionId, to, isGroup = false, event, answering }) => {
+  const { session } = _resolveSession(sessionId);
+  if (!event?.name) throw new WhatsappError("event.name ist erforderlich");
+  const jid = phoneToJid({ to, isGroup });
+  return session.sendMessage(jid, { eventMessage: event }, { quoted: answering });
+};
+
+/**
+ * Sende einen Poll
+ * @param {string} name - Poll-Titel
+ * @param {string[]} options - Antwortmöglichkeiten (2-12)
+ * @param {number} selectableCount - Wie viele Optionen gewählt werden dürfen (0 = unbegrenzt)
+ */
+const sendPoll = async ({ sessionId, to, isGroup = false, name, options, selectableCount = 0, answering }) => {
+  const { session } = _resolveSession(sessionId);
+  if (!name) throw new WhatsappError("name ist erforderlich");
+  if (!options || options.length < 2) throw new WhatsappError("Mindestens 2 Optionen erforderlich");
+  const jid = phoneToJid({ to, isGroup });
+  return session.sendMessage(
+    jid,
+    { poll: { name, values: options, selectableCount } },
+    { quoted: answering }
+  );
+};
+
+/**
+ * Sende einen WhatsApp Status (Story)
+ * @param {object} content - { text?, image?, video?, audio?, backgroundColor?, textColor?, font? }
+ * @param {string[]} jids - Kontakte/Gruppen die den Status sehen sollen
+ */
+const sendStatus = async ({ sessionId, content, jids = [] }) => {
+  const { session } = _resolveSession(sessionId);
+  if (!session.sendStatusUpdate) throw new WhatsappError("sendStatus wird von dieser Baileys-Version nicht unterstützt");
+  return session.sendStatusUpdate(content, jids);
+};
+
 module.exports = {
   sendTextMessage,
   sendImage,
@@ -224,4 +284,9 @@ module.exports = {
   sendButtons,
   sendTyping,
   readMessage,
+  sendInteractive,
+  sendAlbum,
+  sendEvent,
+  sendPoll,
+  sendStatus,
 };
